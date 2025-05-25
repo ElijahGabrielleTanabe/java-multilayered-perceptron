@@ -43,7 +43,7 @@ public class Matrix
         {
             for (int j = 0; j < this.matrix[i].length; j++)
             {
-                this.matrix[i][j] = rand.nextDouble(1 + 1) - 1;
+                this.matrix[i][j] = rand.nextDouble() * 2 - 1;
             }
         }
     }
@@ -61,11 +61,11 @@ public class Matrix
 
     public void add(Matrix m)
     {
-        double[][] matrix = m.getMatrix();
+        double[][] matrix1 = m.getMatrix();
 
-        if (matrix.length != this.matrix.length && matrix[0].length != this.matrix[0].length)
+        if (matrix1.length != this.matrix.length || matrix1[0].length != this.matrix[0].length)
         {
-            throw new IllegalArgumentException("Incompatable matrix size: (" + matrix.length + "x" + matrix[0].length
+            throw new IllegalArgumentException("Incompatable matrix size: (" + matrix1.length + "x" + matrix1[0].length
             + ") + (" + this.matrix.length + "x" + this.matrix[0].length + ")");
         }
 
@@ -73,7 +73,26 @@ public class Matrix
         {
             for (int j = 0; j < this.matrix[0].length; j++)
             {
-                this.matrix[i][j] += matrix[i][j];
+                this.matrix[i][j] += matrix1[i][j];
+            }
+        }
+    }
+
+    public void subtract(Matrix m1)
+    {
+        double[][] matrix1 = m1.getMatrix();
+
+        if (matrix1.length != this.matrix.length || matrix1[0].length != this.matrix[0].length)
+        {
+            throw new IllegalArgumentException("Incompatable matrix size: (" + matrix1.length + "x" + matrix1[0].length
+            + ") + (" + this.matrix.length + "x" + this.matrix[0].length + ")");
+        }
+
+        for (int i = 0; i < this.matrix.length; i++)
+        {
+            for (int j = 0; j < this.matrix[0].length; j++)
+            {
+                this.matrix[i][j] -= matrix1[i][j];
             }
         }
     }
@@ -84,7 +103,7 @@ public class Matrix
         double[][] matrix2 = m2.getMatrix();
         double[][] newMatrix = new double[m1.getMatrix().length][m1.getMatrix()[0].length];
 
-        if (matrix1.length != matrix2.length && matrix1[0].length != matrix2[0].length)
+        if (matrix1.length != matrix2.length || matrix1[0].length != matrix2[0].length)
         {
             throw new IllegalArgumentException("Incompatable matrix size: (" + matrix1.length + "x" + matrix1[0].length
             + ") - (" + matrix2.length + "x" + matrix2[0].length + ")");
@@ -106,7 +125,7 @@ public class Matrix
     {
         double[][] matrix1 = m.getMatrix();
 
-        if (matrix1.length != this.matrix.length && matrix1[0].length != this.matrix[0].length)
+        if (matrix1.length != this.matrix.length || matrix1[0].length != this.matrix[0].length)
         {
             throw new IllegalArgumentException("Incompatable matrix size: (" + matrix1.length + "x" + matrix1[0].length
             + ") - (" + this.matrix.length + "x" + this.matrix[0].length + ")");
@@ -127,7 +146,7 @@ public class Matrix
         {
             for (int j = 0; j < this.matrix[i].length; j++)
             {
-                matrix[i][j] *= n;
+                this.matrix[i][j] *= n;
             }
         }
     }

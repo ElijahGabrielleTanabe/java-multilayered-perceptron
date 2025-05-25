@@ -1,16 +1,36 @@
+import java.util.Random;
+
 public class Main 
 {
     public static void main(String[] args) 
     {
-        NeuralNetwork nn = new NeuralNetwork(2, 3, 2);
+        NeuralNetwork nn = new NeuralNetwork(2, 2, 1);
 
-        double[] sp = {1, 0};
-        double[] ts = {1, 0};
+        Matrix[] inputs = {
+            new Matrix(new double[]{0, 1}),
+            new Matrix(new double[]{1, 0}),
+            new Matrix(new double[]{0, 0}),
+            new Matrix(new double[]{1, 1})
+        };
 
-        Matrix input = new Matrix(sp);
-        Matrix targets = new Matrix(ts);
+        Matrix[] targets = {
+            new Matrix(new double[]{1}),
+            new Matrix(new double[]{1}),
+            new Matrix(new double[]{0}),
+            new Matrix(new double[]{0})
+        };
 
-        System.out.println(nn.feedForward(input));
-        System.out.println(nn.train(input, targets));
+        for (int j = 0; j < 500000; j++)
+        {
+            Random rand = new Random();
+            int i = rand.nextInt(4);
+
+            nn.train(inputs[i], targets[i]);
+        }
+
+        System.out.println(nn.feedForward(new Matrix(new double[]{0, 1})));
+        System.out.println(nn.feedForward(new Matrix(new double[]{1, 0})));
+        System.out.println(nn.feedForward(new Matrix(new double[]{0, 0})));
+        System.out.println(nn.feedForward(new Matrix(new double[]{1, 1})));
     }
 }
