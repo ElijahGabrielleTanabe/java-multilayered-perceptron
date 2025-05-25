@@ -87,7 +87,7 @@ public class Matrix
         if (matrix1.length != matrix2.length && matrix1[0].length != matrix2[0].length)
         {
             throw new IllegalArgumentException("Incompatable matrix size: (" + matrix1.length + "x" + matrix1[0].length
-            + ") + (" + matrix2.length + "x" + matrix2[0].length + ")");
+            + ") - (" + matrix2.length + "x" + matrix2[0].length + ")");
         }
 
         for (int i = 0; i < newMatrix.length; i++)
@@ -99,6 +99,26 @@ public class Matrix
         }
 
         return new Matrix(newMatrix);
+    }
+
+    // Hadamard Product
+    public void multiply(Matrix m)
+    {
+        double[][] matrix1 = m.getMatrix();
+
+        if (matrix1.length != this.matrix.length && matrix1[0].length != this.matrix[0].length)
+        {
+            throw new IllegalArgumentException("Incompatable matrix size: (" + matrix1.length + "x" + matrix1[0].length
+            + ") - (" + this.matrix.length + "x" + this.matrix[0].length + ")");
+        }
+
+        for (int i = 0; i < matrix1.length; i++)
+        {
+            for (int j = 0; j < matrix1[i].length; j++)
+            {
+                this.matrix[i][j] *= matrix1[i][j];
+            }
+        }
     }
 
     public void scalerMultiply(double n)
@@ -181,6 +201,24 @@ public class Matrix
                 this.matrix[i][j] = map.apply(val);
             }
         }
+    }
+
+    public static Matrix map(Matrix m, Func map)
+    {
+        double[][] curMatrix = m.getMatrix();
+
+        Matrix newMatrix = new Matrix(curMatrix.length, curMatrix[0].length);
+
+        for (int i = 0; i < curMatrix.length; i++) 
+        {
+            for (int j = 0; j < curMatrix[i].length; j++) 
+            {
+                double val = curMatrix[i][j];
+                newMatrix.getMatrix()[i][j] = map.apply(val);
+            }
+        }
+
+        return newMatrix;
     }
 
     public double[][] getMatrix() { return this.matrix; }

@@ -6,6 +6,8 @@ public class NeuralNetwork
     private Matrix biasH;
     private Matrix biasO;
 
+    private double learningRate;
+
     public NeuralNetwork(int inputNodes, int hiddenNodes, int outputNodes)
     {
         this.weightsIH = new Matrix(hiddenNodes, inputNodes);
@@ -19,6 +21,8 @@ public class NeuralNetwork
 
         this.biasH.randomize();
         this.biasO.randomize();
+
+        this.learningRate = 0.1;
     }
 
     public Matrix feedForward(Matrix inputs)
@@ -42,15 +46,67 @@ public class NeuralNetwork
         return output;
     }
 
-    public void train(Matrix inputs, Matrix targets)
+    public Matrix train(Matrix inputs, Matrix targets)
     {
-        Matrix outputs = this.feedForward(inputs);
+         //I -> H
+        //Weighted Sum
+        Matrix hidden = Matrix.matrixMultiply(this.weightsIH, inputs);
+        //Apply Bias
+        hidden.add(this.biasH);
+        //Apply Activation Function (returns a double between 0 - 1)
+        hidden.map(x -> sigmoid(x));
 
-        Matrix error = Matrix.substract(targets, outputs);
+        //H -> O
+        //Weight Sum
+        Matrix outputs = Matrix.matrixMultiply(this.weightsHO, hidden);
+        //Apply Bias
+        outputs.add(this.biasO);
+        //Apply Activation Function (return a double between 0 - 1)
+        outputs.map(x -> sigmoid(x));
+
+        Matrix outputErrors = Matrix.subtract(targets, outputs);
+
+        //Gradient = s(x) * (1 - s(x))
+        //Calculate output-gradient
+        Matrix outputGradient = Matrix.map(outputs, x-> dSigmoid(x));
+        outputGradient.multiply(outputErrors); //Hadamard product
+        outputGradient.scalerMultiply(this.learningRate);
+
+        //Calculate delta weights for weightsHO
+        Matrix deltaWeightsHO = Matrix.matrixMultiply(outputGradient, Matrix.transpose(hidden));
+
+        //Apply changes to weightsHO
+        this.weightsHO.add(deltaWeightsHO);
+        //Apply changes to biasO
+        this.biasO.add(outputGradient);
+
+        //Calculate hidden layer errors
+        Matrix tWeightsHO = Matrix.transpose(this.weightsHO); 
+        Matrix hiddenErrors = Matrix.matrixMultiply(tWeightsHO, outputErrors);
+
+        //Calculate hidden-gradient
+        Matrix hiddenGradient = Matrix.map(hidden, x -> dSigmoid(x));
+        hiddenGradient.multiply(hiddenErrors); //Hadamard product
+        hiddenGradient.scalerMultiply(this.learningRate);
+
+        //Calculate delta weights for weightIH
+        Matrix deltaWeightsIH = Matrix.matrixMultiply(hiddenGradient, Matrix.transpose(inputs));
+
+        //Apply changes to weightsIH
+        this.weightsIH.add(deltaWeightsIH);
+        //Apply changes to biasH
+        this.biasH.add(hiddenGradient);
+
+        return null;
     }
 
     private double sigmoid(double x)
     {
         return 1 / (1 + Math.exp(x));
+    }
+
+    private double dSigmoid(double x)
+    {
+        return x * (1 - x);
     }
 }
