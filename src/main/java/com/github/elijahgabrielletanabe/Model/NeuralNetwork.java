@@ -1,3 +1,5 @@
+package com.github.elijahgabrielletanabe.Model;
+
 public class NeuralNetwork
 {
     private Matrix weightsIH;
@@ -22,7 +24,7 @@ public class NeuralNetwork
         this.biasH.randomize();
         this.biasO.randomize();
 
-        this.learningRate = 0.01;
+        this.learningRate = 0.1;
     }
 
     public Matrix feedForward(Matrix inputs)

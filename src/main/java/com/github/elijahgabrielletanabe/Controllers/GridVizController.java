@@ -1,8 +1,21 @@
-import java.util.Random;
+package com.github.elijahgabrielletanabe.Controllers;
 
-public class Main 
+import java.io.IOException;
+import java.net.URL;
+import java.util.Random;
+import java.util.ResourceBundle;
+
+import com.github.elijahgabrielletanabe.App;
+import com.github.elijahgabrielletanabe.Model.Matrix;
+import com.github.elijahgabrielletanabe.Model.NeuralNetwork;
+
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+
+public class GridVizController implements Initializable 
 {
-    public static void main(String[] args) 
+    @Override
+    public void initialize(URL location, ResourceBundle resources) 
     {
         NeuralNetwork nn = new NeuralNetwork(2, 2, 1);
 
@@ -20,7 +33,7 @@ public class Main
             new Matrix(new double[]{0})
         };
 
-        for (int j = 0; j < 500000; j++)
+        for (int j = 0; j < 100000; j++)
         {
             Random rand = new Random();
             int i = rand.nextInt(4);
@@ -32,5 +45,11 @@ public class Main
         System.out.println(nn.feedForward(new Matrix(new double[]{1, 0})));
         System.out.println(nn.feedForward(new Matrix(new double[]{0, 0})));
         System.out.println(nn.feedForward(new Matrix(new double[]{1, 1})));
+    }
+
+    @FXML
+    private void switchToSecondary() throws IOException 
+    {
+        App.setRoot("secondary");
     }
 }

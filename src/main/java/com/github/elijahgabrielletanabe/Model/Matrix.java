@@ -1,3 +1,5 @@
+package com.github.elijahgabrielletanabe.Model;
+
 import java.util.Arrays;
 import java.util.Random;
 
@@ -39,13 +41,7 @@ public class Matrix
     {
         Random rand = new Random();
 
-        for (int i = 0; i < this.matrix.length; i++)
-        {
-            for (int j = 0; j < this.matrix[i].length; j++)
-            {
-                this.matrix[i][j] = rand.nextDouble() * 2 - 1;
-            }
-        }
+        this.map(x -> rand.nextDouble() * 2 - 1);
     }
 
     public void add(double n)
