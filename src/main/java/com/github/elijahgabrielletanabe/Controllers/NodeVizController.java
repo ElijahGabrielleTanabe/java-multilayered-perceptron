@@ -8,8 +8,10 @@ import javafx.fxml.FXML;
 
 public class NodeVizController {
 
+    /* 
     @FXML
     private void switchToPrimary() throws IOException {
         App.setRoot("primary");
     }
+    */
 }

@@ -24,7 +24,7 @@ public class NeuralNetwork
         this.biasH.randomize();
         this.biasO.randomize();
 
-        this.learningRate = 0.1;
+        this.learningRate = 0.01;
     }
 
     public Matrix feedForward(Matrix inputs)

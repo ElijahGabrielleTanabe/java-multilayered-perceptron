@@ -1,5 +1,6 @@
 com\github\elijahgabrielletanabe\Controllers\NodeVizController.class
 com\github\elijahgabrielletanabe\App.class
+com\github\elijahgabrielletanabe\Controllers\GridVizController$1.class
 module-info.class
 com\github\elijahgabrielletanabe\Controllers\GridVizController.class
 com\github\elijahgabrielletanabe\Model\NeuralNetwork.class
