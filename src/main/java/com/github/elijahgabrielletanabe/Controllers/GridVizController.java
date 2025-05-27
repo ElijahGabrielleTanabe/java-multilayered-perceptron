@@ -8,24 +8,41 @@ import com.github.elijahgabrielletanabe.Model.Matrix;
 import com.github.elijahgabrielletanabe.Model.NeuralNetwork;
 
 import javafx.animation.AnimationTimer;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
+import javafx.scene.control.Slider;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 
 public class GridVizController implements Initializable 
 {
     @FXML private Canvas XORGrid;
+    
+    @FXML private Slider speedSlider;
+    @FXML private Slider learningRateSlider;
+    @FXML private Slider hiddenNodesSlider;
+    @FXML private Slider resolutionSlider; //Queue
+    
+    @FXML private Button pausePlayButton;
+    @FXML private Button restartButton;
 
-    private final NeuralNetwork nn;
     private final Matrix[] inputs;
     private final Matrix[] targets;
 
+    private NeuralNetwork nn;
+    private AnimationTimer timer;
+    private boolean playing;
+    private double resolution;
+    private double speed;
+
     public GridVizController()
     {
-        this.nn = new NeuralNetwork(2, 4, 1);
-
+        this.playing = false;
+        
         this.inputs = new Matrix[]{
             new Matrix(new double[]{0, 1}),
             new Matrix(new double[]{1, 0}),
@@ -44,16 +61,24 @@ public class GridVizController implements Initializable
     @Override
     public void initialize(URL location, ResourceBundle resources) 
     {
+        //#Initialize Values
         GraphicsContext gc = this.XORGrid.getGraphicsContext2D();
+        this.speed = this.speedSlider.getMax() + 1 - this.speedSlider.getValue();
+        this.resolution = this.resolutionSlider.getValue();
+        this.nn = new NeuralNetwork(2, (int) this.hiddenNodesSlider.getValue(), 1);
+        this.nn.setLearningRate(learningRateSlider.getValue());
 
-        AnimationTimer timer = new AnimationTimer() {
+        //# Animation loop
+        this.timer = new AnimationTimer() {
             private long last = 0;
-            private float duration = 16.67F; //Milliseconds
+            //# Take from speed slider
+            private double duration = 16.67; //Milliseconds      
             @Override
             public void handle(long now)
             {
                 if (now - last >= duration * 1000000) //Nanoseconds
                 {
+                    this.duration = getSpeed();
                     train();
                     fillGrid(gc);
                     last = now;
@@ -61,7 +86,42 @@ public class GridVizController implements Initializable
             }
         };
 
-        timer.start();
+        //# Restart button event listener
+        this.restartButton.setOnAction((ActionEvent e) -> {
+            //# New NeuralNetwork object
+            double learningRate = this.learningRateSlider.getValue();
+            int hiddenNodes = (int) this.hiddenNodesSlider.getValue();
+
+            this.nn = new NeuralNetwork(2, hiddenNodes, 1);
+            this.nn.setLearningRate(learningRate);
+            this.resolution = this.resolutionSlider.getValue();
+            this.playing = true;
+            this.pausePlayButton.setText("Pause");
+
+            this.timer.start();
+        });
+
+        //# Pause button event listener
+        this.pausePlayButton.setOnAction((ActionEvent e) -> {
+            this.playing = !this.playing;
+
+            if (!this.playing)
+            {
+                this.timer.stop();
+                this.pausePlayButton.setText("Play");
+            }
+            else if (this.playing)
+            {
+                this.timer.start();
+                this.pausePlayButton.setText("Pause");
+            }
+        });
+    }
+
+    @FXML
+    public void speedSliderChanged(MouseEvent event) 
+    {
+        this.speed = this.speedSlider.getMax() + 1 - this.speedSlider.getValue();
     }
 
     private void train()
@@ -79,13 +139,12 @@ public class GridVizController implements Initializable
 
     private void fillGrid(GraphicsContext gc)
     {
-        double resolution = 150;
         double gridSize = this.XORGrid.getHeight();
-        double widthAndHeight = gridSize / resolution;
+        double widthAndHeight = gridSize / this.resolution;
 
-        for (double i = 0; i < resolution; i++)
+        for (double i = 0; i < this.resolution; i++)
         {
-            for (double j = 0; j < resolution; j++)
+            for (double j = 0; j < this.resolution; j++)
             {
                 double x = map(widthAndHeight * j, 0, gridSize, 0, 1);
                 double y = map(widthAndHeight * i, 0, gridSize, 0, 1);
@@ -103,4 +162,6 @@ public class GridVizController implements Initializable
     {
         return (1 - ((value - minA) / (maxA - minA))) * minB + ((value - minA) / (maxA - minA)) * maxB;
     }
+
+    public double getSpeed() { return this.speed; }
 }   

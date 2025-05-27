@@ -115,4 +115,6 @@ public class NeuralNetwork
     {
         return x * (1 - x);
     }
+
+    public void setLearningRate(double learningRate) { this.learningRate = learningRate; }
 }

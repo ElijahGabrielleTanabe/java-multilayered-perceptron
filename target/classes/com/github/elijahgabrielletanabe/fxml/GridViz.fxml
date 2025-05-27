@@ -30,7 +30,7 @@
                         <Insets bottom="6.0" />
                      </VBox.margin>
                   </Label>
-                  <Slider blockIncrement="25.0" majorTickUnit="100.0" max="500.0" showTickLabels="true" showTickMarks="true" snapToTicks="true">
+                  <Slider fx:id="speedSlider" blockIncrement="25.0" majorTickUnit="75.0" max="300.0" onMouseReleased="#speedSliderChanged" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="300.0">
                      <padding>
                         <Insets left="15.0" right="15.0" />
                      </padding>
@@ -47,7 +47,23 @@
                         <Insets bottom="6.0" />
                      </VBox.margin>
                   </Label>
-                  <Slider blockIncrement="0.01" majorTickUnit="0.02" max="0.1" minorTickCount="1" prefWidth="100.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" />
+                  <Slider fx:id="learningRateSlider" blockIncrement="0.01" majorTickUnit="0.02" max="0.1" minorTickCount="1" prefWidth="100.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.1" />
+               </children>
+               <padding>
+                  <Insets left="15.0" right="15.0" />
+               </padding>
+            </VBox>
+            <VBox alignment="TOP_CENTER" prefWidth="186.0">
+               <children>
+                  <Label text="Hidden Nodes">
+                     <font>
+                        <Font name="Lucida Console" size="12.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets bottom="6.0" />
+                     </VBox.margin>
+                  </Label>
+                  <Slider fx:id="hiddenNodesSlider" blockIncrement="1.0" majorTickUnit="1.0" max="10.0" min="1.0" minorTickCount="0" prefWidth="100.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="4.0" />
                </children>
                <padding>
                   <Insets left="15.0" right="15.0" />
@@ -63,7 +79,7 @@
                         <Insets bottom="6.0" />
                      </VBox.margin>
                   </Label>
-                  <Slider blockIncrement="25.0" majorTickUnit="100.0" max="400.0" prefWidth="100.0" showTickLabels="true" showTickMarks="true" snapToTicks="true">
+                  <Slider fx:id="resolutionSlider" blockIncrement="25.0" majorTickUnit="100.0" max="400.0" prefWidth="100.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="100.0">
                      <padding>
                         <Insets left="15.0" right="15.0" />
                      </padding>
@@ -108,7 +124,7 @@
                   <Insets />
                </VBox.margin>
             </VBox>
-            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="246.0" style="-fx-spacing: 25;" VBox.vgrow="ALWAYS">
+            <VBox alignment="CENTER" prefWidth="250.0" style="-fx-spacing: 25;" VBox.vgrow="ALWAYS">
                <VBox.margin>
                   <Insets />
                </VBox.margin>
@@ -118,17 +134,20 @@
                         <Font name="Lucida Console" size="12.0" />
                      </font>
                   </Button>
-                  <Button mnemonicParsing="false" prefHeight="35.0" prefWidth="115.0" text="Pause">
+                  <Button fx:id="pausePlayButton" mnemonicParsing="false" prefHeight="35.0" prefWidth="115.0" text="Play">
                      <font>
                         <Font name="Lucida Console" size="12.0" />
                      </font>
                   </Button>
-                  <Button mnemonicParsing="false" prefHeight="35.0" prefWidth="115.0" text="Restart">
+                  <Button fx:id="restartButton" mnemonicParsing="false" prefHeight="35.0" prefWidth="115.0" text="Restart">
                      <font>
                         <Font name="Lucida Console" size="12.0" />
                      </font>
                   </Button>
                </children>
+               <padding>
+                  <Insets bottom="15.0" top="15.0" />
+               </padding>
             </VBox>
          </children></VBox>
    </children>
