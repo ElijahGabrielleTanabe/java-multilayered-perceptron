@@ -24,7 +24,7 @@ public class GridVizController implements Initializable
 
     public GridVizController()
     {
-        this.nn = new NeuralNetwork(2, 6, 1);
+        this.nn = new NeuralNetwork(2, 4, 1);
 
         this.inputs = new Matrix[]{
             new Matrix(new double[]{0, 1}),
