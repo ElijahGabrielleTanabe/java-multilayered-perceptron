@@ -116,5 +116,10 @@ public class NeuralNetwork
         return x * (1 - x);
     }
 
+    public Matrix getWeightsIH() { return this.weightsIH; }
+    public Matrix getWeightsHO() { return this.weightsHO; }
+    public Matrix getBiasH() { return this.biasH; }
+    public Matrix getBiasO() { return this.biasO; }
+
     public void setLearningRate(double learningRate) { this.learningRate = learningRate; }
 }

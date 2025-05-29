@@ -237,6 +237,34 @@ public class Matrix
     }
 
     public double[][] getMatrix() { return this.matrix; }
+    public double getMinValue()
+    {
+        Double min = Double.MAX_VALUE;
+
+        for (int i = 0; i < this.matrix.length; i++)
+        {
+            for (int j = 0; j < this.matrix[i].length; j++)
+            {
+                if (this.matrix[i][j] < min) { min = this.matrix[i][j]; }
+            }
+        }
+
+        return min;
+    }
+    public double getMaxValue()
+    {
+        Double max = Double.MIN_VALUE;
+
+        for (int i = 0; i < this.matrix.length; i++)
+        {
+            for (int j = 0; j < this.matrix[i].length; j++)
+            {
+                if (this.matrix[i][j] > max) { max = this.matrix[i][j]; }
+            }
+        }
+
+        return max;
+    }
 
     public void setMatrix(Matrix matrix) { this.matrix = matrix.getMatrix(); }
     public void setMatrix(double[][] matrix) { this.matrix = matrix; }

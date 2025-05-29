@@ -1,22 +1,28 @@
 package com.github.elijahgabrielletanabe.Controllers;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Random;
 import java.util.ResourceBundle;
 
+import com.github.elijahgabrielletanabe.App;
 import com.github.elijahgabrielletanabe.Model.Matrix;
 import com.github.elijahgabrielletanabe.Model.NeuralNetwork;
 
 import javafx.animation.AnimationTimer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 
 public class GridVizController implements Initializable 
 {
@@ -124,6 +130,27 @@ public class GridVizController implements Initializable
         this.speed = this.speedSlider.getMax() + 1 - this.speedSlider.getValue();
     }
 
+    @FXML
+    public void openNodeView(MouseEvent event)
+    {
+        try {
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("fxml/NodeViz.fxml"));
+            Parent root = loader.load();
+            NodeVizController controller = loader.getController();
+            Stage nodeStage = new Stage();
+            Scene nodeScene = new Scene(root);
+
+            controller.setNeuralNetwork(this.nn);
+            controller.setStage(nodeStage);
+            nodeStage.setScene(nodeScene);
+            nodeStage.setResizable(false);
+            nodeStage.show();
+        } catch (IOException e) {
+            System.out.println("Unable to load: NodeViz.fxml");
+        }
+    }
+
+    //# Train on worker thread
     private void train()
     {
         int iters = 5000;
@@ -146,8 +173,8 @@ public class GridVizController implements Initializable
         {
             for (double j = 0; j < this.resolution; j++)
             {
-                double x = map(widthAndHeight * j, 0, gridSize, 0, 1);
-                double y = map(widthAndHeight * i, 0, gridSize, 0, 1);
+                double x = App.map(widthAndHeight * j, 0, gridSize, 0, 1);
+                double y = App.map(widthAndHeight * i, 0, gridSize, 0, 1);
 
                 Matrix output = nn.feedForward(new Matrix(new double[]{x, y}));
                 double result = output.getMatrix()[0][0];
@@ -156,11 +183,6 @@ public class GridVizController implements Initializable
                 gc.fillRect(widthAndHeight * j, widthAndHeight * i, widthAndHeight, widthAndHeight);
             }
         }
-    }
-
-    private static double map(double value, double minA, double maxA, double minB, double maxB) 
-    {
-        return (1 - ((value - minA) / (maxA - minA))) * minB + ((value - minA) / (maxA - minA)) * maxB;
     }
 
     public double getSpeed() { return this.speed; }

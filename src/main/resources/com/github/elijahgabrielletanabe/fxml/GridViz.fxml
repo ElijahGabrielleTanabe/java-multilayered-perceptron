@@ -129,7 +129,7 @@
                   <Insets />
                </VBox.margin>
                <children>
-                  <Button mnemonicParsing="false" prefHeight="35.0" prefWidth="115.0" text="View Nodes">
+                  <Button mnemonicParsing="false" onMouseClicked="#openNodeView" prefHeight="35.0" prefWidth="115.0" text="View Nodes">
                      <font>
                         <Font name="Lucida Console" size="12.0" />
                      </font>
