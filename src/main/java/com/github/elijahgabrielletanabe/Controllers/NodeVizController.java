@@ -132,19 +132,19 @@ public class NodeVizController implements Initializable
         updateWeightLines();
     }
     
-    private void updateWeightLines()
+    public void updateWeightLines()
     {
+        System.out.println("Updating Weight Lines!");
         //Extremely hardcoded due to there being only two weight matrices
         double[][] weightsIH = this.nn.getWeightsIH().getMatrix();
         double[][] weightsHO = this.nn.getWeightsHO().getMatrix();
+
+        if (this.weightLines.isEmpty()) { return; }
 
         if ((weightsIH.length * weightsIH[0].length) != this.weightLines.get(0).size())
         {
             throw new IllegalArgumentException("Not the same size: " + weightsIH.length + " vs " + this.weightLines.get(0).size());
         }
-
-        System.out.println(weightsIH.length);
-        System.out.println(this.weightLines.get(0).size());
 
         int index = 0;
         //WeightsIH
@@ -165,7 +165,6 @@ public class NodeVizController implements Initializable
                 }
 
                 this.weightLines.get(0).get(index).setStroke(color);
-                System.out.println("Weight: " + weight);
                 index++;
             }
         }
@@ -182,19 +181,19 @@ public class NodeVizController implements Initializable
             for (int j = 0; j < weightsHO[i].length; j++)
             {
                 //Weights range -1 - 1
-                double weight = App.map(weightsHO[i][j], this.nn.getWeightsIH().getMinValue(), this.nn.getWeightsIH().getMaxValue(), -1, 1);
+                double weight = weightsHO[i][j];
+                double normalized = App.map(weight, this.nn.getWeightsHO().getMinValue(), this.nn.getWeightsHO().getMaxValue(), -1, 1);
                 Color color = null;
 
-                if (weight > 0) {
-                    color = new Color(0, 0, weight, 1.0);
-                } else if (weight < 0) {
-                    color = new Color(-weight, 0, 0, 1.0);
+                if (normalized > 0) {
+                    color = new Color(0, 0, normalized, 1.0);
+                } else if (normalized < 0) {
+                    color = new Color(normalized * -1, 0, 0, 1.0);
                 } else {
                     color = new Color(0, 0, 0, 1.0);
                 }
 
                 this.weightLines.get(1).get(index).setStroke(color);
-                System.out.println("Weight: " + weight);
                 index++;
             }
         }
@@ -207,7 +206,7 @@ public class NodeVizController implements Initializable
 
         this.stage.setOnShown(e -> {
             System.out.println("Stage set");
-            PauseTransition delay = new PauseTransition(Duration.millis(100));
+            PauseTransition delay = new PauseTransition(Duration.millis(50));
             delay.setOnFinished(ev -> createWeightLines());
             delay.play();
         });

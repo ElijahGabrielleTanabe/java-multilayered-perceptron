@@ -129,17 +129,17 @@
                   <Insets />
                </VBox.margin>
                <children>
-                  <Button mnemonicParsing="false" onMouseClicked="#openNodeView" prefHeight="35.0" prefWidth="115.0" text="View Nodes">
+                  <Button fx:id="nodeViewButton" mnemonicParsing="false" onMouseClicked="#nodeViewPressed" prefHeight="35.0" prefWidth="115.0" text="View Nodes">
                      <font>
                         <Font name="Lucida Console" size="12.0" />
                      </font>
                   </Button>
-                  <Button fx:id="pausePlayButton" mnemonicParsing="false" prefHeight="35.0" prefWidth="115.0" text="Play">
+                  <Button fx:id="pausePlayButton" mnemonicParsing="false" onMousePressed="#pausePlayPressed" prefHeight="35.0" prefWidth="115.0" text="Play">
                      <font>
                         <Font name="Lucida Console" size="12.0" />
                      </font>
                   </Button>
-                  <Button fx:id="restartButton" mnemonicParsing="false" prefHeight="35.0" prefWidth="115.0" text="Restart">
+                  <Button fx:id="restartButton" mnemonicParsing="false" onMousePressed="#restartPressed" prefHeight="35.0" prefWidth="115.0" text="Restart">
                      <font>
                         <Font name="Lucida Console" size="12.0" />
                      </font>
