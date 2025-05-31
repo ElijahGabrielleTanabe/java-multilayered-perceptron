@@ -1,7 +1,9 @@
 package com.github.elijahgabrielletanabe.Controllers;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.ResourceBundle;
 
 import com.github.elijahgabrielletanabe.App;
@@ -11,12 +13,18 @@ import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -33,10 +41,15 @@ public class NodeVizController implements Initializable
     private Stage stage;
     //For each weight, there is a corresponding line
     private final ArrayList<ArrayList<Line>> weightLines;
+    private final HashMap<Circle, Integer> circleToNode;
+
+    private HeatmapVizController heatMapController;
+    private Stage heatMapStage;
 
     public NodeVizController()
     {
         this.weightLines = new ArrayList<>();
+        this.circleToNode = new HashMap<>();
     }
 
     @Override
@@ -46,29 +59,52 @@ public class NodeVizController implements Initializable
             double vboxWidth = this.hbox.getWidth() / 3;
 
             //# Make Input nodes VBox
-            VBox inputNodes = createNodeVBox(this.nn.getWeightsIH().getMatrix()[0].length, vboxWidth);
+            VBox inputNodes = createNodeVBox(this.nn.getWeightsIH().getMatrix()[0].length, vboxWidth, "Input Layer");
 
             //# Make Hidden nodes VBox
-            VBox hiddenNodes = createNodeVBox(this.nn.getWeightsIH().getMatrix().length, vboxWidth);
+            VBox hiddenNodes = createNodeVBox(this.nn.getWeightsIH().getMatrix().length, vboxWidth, "Hidden Layer");
+            //# Map circle to corrusponding node
+            VBox hiddenNodeVBox = (VBox) hiddenNodes.getChildren().get(1);
+            ObservableList<Node> hiddenNodesList = hiddenNodeVBox.getChildren();
+
+            for (int i = 0; i < hiddenNodesList.size(); i++)
+            {
+                Circle node = (Circle) hiddenNodesList.get(i);
+
+                node.setOnMouseClicked((MouseEvent event) -> {
+                    Circle circle = (Circle) event.getSource();
+                    createHeatMap(circle);
+                });
+
+                this.circleToNode.put(node, i);
+            }
 
             //# Make Output nodes VBox
-            VBox outputNodes = createNodeVBox(this.nn.getWeightsHO().getMatrix().length, vboxWidth);
+            VBox outputNodes = createNodeVBox(this.nn.getWeightsHO().getMatrix().length, vboxWidth, "Output Layer");
 
             this.hbox.getChildren().addAll(inputNodes, hiddenNodes, outputNodes);
         });
     }
 
-    private VBox createNodeVBox(int nodes, double vboxWidth)
+    private VBox createNodeVBox(int nodes, double vboxWidth, String name)
     {
-        VBox vbox = new VBox(60);
-        vbox.setMinWidth(vboxWidth);
-        vbox.setMaxWidth(Double.MAX_VALUE);
-        vbox.setPrefWidth(vboxWidth);
-        vbox.setAlignment(Pos.CENTER);
+        VBox parent = new VBox();
+        Label label = new Label(name);
 
-        createCircles(vbox, nodes);
+        VBox nodeVbox = new VBox(60);
+        //nodeVbox.setMinWidth(vboxWidth);
+        //nodeVbox.setMaxWidth(Double.MAX_VALUE);
+        nodeVbox.setPrefWidth(vboxWidth);
+        nodeVbox.setAlignment(Pos.CENTER);
+
+        createCircles(nodeVbox, nodes);
+
+        parent.getChildren().addAll(label, nodeVbox);
+        parent.setPrefWidth(vboxWidth);
+        parent.setAlignment(Pos.TOP_CENTER);
+        VBox.setVgrow(nodeVbox, Priority.ALWAYS);
         
-        return vbox;
+        return parent;
     }
 
     private void createCircles(VBox container, int num)
@@ -80,9 +116,42 @@ public class NodeVizController implements Initializable
         }
     }
 
+    private void createHeatMap(Circle node)
+    {
+        try {
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("fxml/HeatmapViz.fxml"));
+            Parent root = loader.load();
+            this.heatMapController = loader.getController();
+            this.heatMapStage = new Stage();
+            Scene heatMapScene = new Scene(root);
+
+            this.heatMapController.setNeuralNetwork(this.nn);
+            this.heatMapController.setNode(this.circleToNode.get(node));
+            this.heatMapController.createHeatMap();
+            this.heatMapStage.setScene(heatMapScene);
+            this.heatMapStage.show();
+        } catch (IOException e) {
+            System.out.println("Could not find HeatmapViz.fxml");
+        }
+    }
+
     private void createWeightLines()
     {
-        ObservableList<Node> vboxList = this.hbox.getChildren();
+        ArrayList<VBox> vboxList = new ArrayList<>();
+        ObservableList<Node> parentHboxList = this.hbox.getChildren();
+        
+        for (int i = 0; i < parentHboxList.size(); i++)
+        {
+            if (!(parentHboxList.get(i) instanceof VBox)) { throw new IllegalArgumentException("Unexpected node: " + parentHboxList.get(i)); }
+
+            VBox parentVBox = (VBox) parentHboxList.get(i);
+            ObservableList<Node> parentVboxList = parentVBox.getChildren();
+
+            if (!(parentVboxList.get(1) instanceof VBox)) { throw new IllegalArgumentException("Unexpected node: " + parentVboxList.get(1)); }
+
+            VBox vbox = (VBox) parentVboxList.get(1);
+            vboxList.add(vbox);
+        }
 
         for (int i = 1; i < vboxList.size(); i++)
         {
@@ -118,7 +187,8 @@ public class NodeVizController implements Initializable
                     System.out.println("p2: x = " + p2.getCenterX() + ", y = " + p2.getCenterY());
 
                     Line line = new Line(p1.getCenterX(), p1.getCenterY(), p2.getCenterX(), p2.getCenterY());
-                    line.setStrokeWidth(2);
+                    line.setStrokeWidth(2.1);
+
                     this.weightLines.get(i - 1).add(line);
                 }
             }
@@ -135,7 +205,7 @@ public class NodeVizController implements Initializable
     public void updateWeightLines()
     {
         System.out.println("Updating Weight Lines!");
-        //Extremely hardcoded due to there being only two weight matrices
+        //Extremely hardcoded due to NeuralNetwork's design
         double[][] weightsIH = this.nn.getWeightsIH().getMatrix();
         double[][] weightsHO = this.nn.getWeightsHO().getMatrix();
 
@@ -153,13 +223,14 @@ public class NodeVizController implements Initializable
             for (int j = 0; j < weightsIH[i].length; j++)
             {
                 //Weights range -1 - 1
-                double weight = App.map(weightsIH[i][j], this.nn.getWeightsIH().getMinValue(), this.nn.getWeightsIH().getMaxValue(), -1, 1);
+                double weight = weightsIH[i][j];
+                double normalized = App.map(weight, this.nn.getWeightsIH().getMinValue(), this.nn.getWeightsIH().getMaxValue(), -1, 1);
                 Color color = null;
 
-                if (weight > 0) {
-                    color = new Color(0, 0, weight, 1.0);
-                } else if (weight < 0) {
-                    color = new Color(-weight, 0, 0, 1.0);
+                if (normalized > 0) {
+                    color = new Color(0, 0, normalized, 1.0);
+                } else if (normalized < 0) {
+                    color = new Color(-normalized, 0, 0, 1.0);
                 } else {
                     color = new Color(0, 0, 0, 1.0);
                 }
@@ -197,6 +268,16 @@ public class NodeVizController implements Initializable
                 index++;
             }
         }
+    }
+
+    public void cleanUp()
+    {
+        if (this.heatMapStage != null) 
+        { 
+            this.heatMapStage.close();
+            this.heatMapStage = null;
+        }
+        if (this.heatMapController != null) { this.heatMapController = null; }
     }
 
     public void setNeuralNetwork(NeuralNetwork nn) { this.nn = nn; }

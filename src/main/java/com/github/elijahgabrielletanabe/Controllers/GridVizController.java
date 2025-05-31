@@ -11,7 +11,7 @@ import com.github.elijahgabrielletanabe.Model.NeuralNetwork;
 
 import javafx.animation.AnimationTimer;
 import javafx.animation.PauseTransition;
-import javafx.event.ActionEvent;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -136,7 +136,7 @@ public class GridVizController implements Initializable
             if (this.nodeStage != null)
             {
                 try {
-                    this.nodeStage.hide();
+                    this.nodeStage.close();
                     createNodeView();
                 } catch (IOException ex) {
                     System.out.println("Unable to load: NodeViz.fxml");
@@ -178,13 +178,26 @@ public class GridVizController implements Initializable
         this.nodeStage.setResizable(false);
         this.nodeStage.setOnHidden(e -> cleanUpNodeView());
         this.nodeStage.show();
+        this.nodeViewButton.setDisable(true);
     }
 
-    private void cleanUpNodeView()
+    public void cleanUpNodeView()
     {
         System.out.println("Cleaning Node View!");
-        this.nodeController = null;
-        this.nodeStage = null;
+
+        if (this.nodeController != null)
+        {
+            this.nodeController.cleanUp();
+            this.nodeController = null;
+        }
+        
+        if (this.nodeStage != null) 
+        { 
+            this.nodeStage.close();
+            this.nodeStage = null;
+        }
+        
+        this.nodeViewButton.setDisable(false);
     }
 
     //# Train on worker thread
@@ -221,9 +234,11 @@ public class GridVizController implements Initializable
             }
         }
 
-        PauseTransition delay = new PauseTransition(Duration.millis(100));
-        delay.setOnFinished(e -> {if (this.nodeController != null) { this.nodeController.updateWeightLines(); }});
-        delay.play();
+        Platform.runLater(() -> {
+            if (this.nodeController != null) {
+                this.nodeController.updateWeightLines();
+            }
+        });
     }
 
     public double getSpeed() { return this.speed; }

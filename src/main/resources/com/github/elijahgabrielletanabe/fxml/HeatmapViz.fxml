@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.elijahgabrielletanabe.Controllers.HeatmapVizController">
+   <children>
+      <LineChart alternativeRowFillVisible="false" horizontalGridLinesVisible="false" horizontalZeroLineVisible="false" prefHeight="650.0" prefWidth="650.0" verticalGridLinesVisible="false" verticalZeroLineVisible="false">
+        <xAxis>
+          <NumberAxis autoRanging="false" label="X-Axis" minorTickCount="3" side="BOTTOM" tickUnit="0.25" upperBound="1.0">
+               <tickLabelFont>
+                  <Font name="Lucida Console" size="8.0" />
+               </tickLabelFont></NumberAxis>
+        </xAxis>
+        <yAxis>
+          <NumberAxis autoRanging="false" label="Y-Axis" minorTickCount="3" side="LEFT" tickUnit="0.25" upperBound="1.0">
+               <tickLabelFont>
+                  <Font name="Lucida Console" size="8.0" />
+               </tickLabelFont></NumberAxis>
+        </yAxis>
+      </LineChart>
+      <Canvas fx:id="heatMapCanvas" height="580.0" layoutX="67.0" layoutY="14.0" width="568.0" />
+   </children>
+</AnchorPane>

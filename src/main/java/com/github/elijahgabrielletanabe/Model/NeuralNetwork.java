@@ -2,6 +2,9 @@ package com.github.elijahgabrielletanabe.Model;
 
 public class NeuralNetwork
 {
+    private Matrix hiddenOut;
+    private Matrix outputOut;
+
     private Matrix weightsIH;
     private Matrix weightsHO;
 
@@ -24,62 +27,66 @@ public class NeuralNetwork
         this.biasH.randomize();
         this.biasO.randomize();
 
+        this.hiddenOut = new Matrix(new double[hiddenNodes]);
+        this.outputOut = new Matrix(new double[outputNodes]);
+
         this.learningRate = 0.01;
+    }
+
+    public Matrix feedForwardOnNode(Matrix inputs, int node)
+    {
+        double[] weights = weightsIH.getMatrix()[node];
+        Matrix weightMatrix = new Matrix(new double[][]{weights});
+
+        double[] bias = biasH.getMatrix()[node];
+        Matrix biasMatrix = new Matrix(bias);
+
+        Matrix output = Matrix.matrixMultiply(weightMatrix, inputs);
+        output.add(biasMatrix);
+        output.map(x -> sigmoid(x));
+
+        return output;
     }
 
     public Matrix feedForward(Matrix inputs)
     {
         //I -> H
         //Weighted Sum
-        Matrix hidden = Matrix.matrixMultiply(this.weightsIH, inputs);
+        this.hiddenOut = Matrix.matrixMultiply(this.weightsIH, inputs);
         //Apply Bias
-        hidden.add(this.biasH);
+        this.hiddenOut.add(this.biasH);
         //Apply Activation Function (returns a double between 0 - 1)
-        hidden.map(x -> sigmoid(x));
+        this.hiddenOut.map(x -> sigmoid(x));
 
         //H -> O
         //Weight Sum
-        Matrix output = Matrix.matrixMultiply(this.weightsHO, hidden);
+        this.outputOut = Matrix.matrixMultiply(this.weightsHO, this.hiddenOut);
         //Apply Bias
-        output.add(this.biasO);
+        this.outputOut.add(this.biasO);
         //Apply Activation Function (return a double between 0 - 1)
-        output.map(x -> sigmoid(x));
+        this.outputOut.map(x -> sigmoid(x));
 
-        return output;
+        return this.outputOut;
     }
 
     public void train(Matrix inputs, Matrix targets)
     {
-         //I -> H
-        //Weighted Sum
-        Matrix hidden = Matrix.matrixMultiply(this.weightsIH, inputs);
-        //Apply Bias
-        hidden.add(this.biasH);
-        //Apply Activation Function (returns a double between 0 - 1)
-        hidden.map(x -> sigmoid(x));
-
-        //H -> O
-        //Weight Sum
-        Matrix outputs = Matrix.matrixMultiply(this.weightsHO, hidden);
-        //Apply Bias
-        outputs.add(this.biasO);
-        //Apply Activation Function (return a double between 0 - 1)
-        outputs.map(x -> sigmoid(x));
+        feedForward(inputs);
 
         //Cost function??
-        Matrix outputErrors = Matrix.subtract(targets, outputs);
+        Matrix outputErrors = Matrix.subtract(targets, this.outputOut);
 
         //Gradient = s(x) * (1 - s(x))
         //These calculations hinge on the chain rule
         //where C(l)/W(l) = (z(l)/w(l))*(a(l)/z(l))*(c(l)/a(l))
         //                = a(l-1)*s'(z(l))*2(a(l) - y)
         //Calculate output-gradient
-        Matrix outputGradient = Matrix.map(outputs, x-> dSigmoid(x)); //s'(z(l))
+        Matrix outputGradient = Matrix.map(this.outputOut, x-> dSigmoid(x)); //s'(z(l))
         outputGradient.multiply(outputErrors); //(a(l) - y) [Hadamard product]
         outputGradient.scalerMultiply(this.learningRate); //Regulating steps down the gradient
 
         //Calculate delta weights for weightsHO
-        Matrix tHidden = Matrix.transpose(hidden);
+        Matrix tHidden = Matrix.transpose(this.hiddenOut);
         Matrix deltaWeightsHO = Matrix.matrixMultiply(outputGradient, tHidden); //a(l-1)
 
         //Apply changes to weightsHO
@@ -92,7 +99,7 @@ public class NeuralNetwork
         Matrix hiddenErrors = Matrix.matrixMultiply(tWeightsHO, outputErrors);
 
         //Calculate hidden-gradient
-        Matrix hiddenGradient = Matrix.map(hidden, x -> dSigmoid(x));
+        Matrix hiddenGradient = Matrix.map(this.hiddenOut, x -> dSigmoid(x));
         hiddenGradient.multiply(hiddenErrors); //Hadamard product
         hiddenGradient.scalerMultiply(this.learningRate);
 
@@ -116,6 +123,8 @@ public class NeuralNetwork
         return x * (1 - x);
     }
 
+    public Matrix getHiddenOut() { return this.hiddenOut; }
+    public Matrix getOutputOut() { return this.outputOut; }
     public Matrix getWeightsIH() { return this.weightsIH; }
     public Matrix getWeightsHO() { return this.weightsHO; }
     public Matrix getBiasH() { return this.biasH; }
