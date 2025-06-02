@@ -6,149 +6,188 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Slider?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.Font?>
 
-<HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.elijahgabrielletanabe.Controllers.GridVizController">
-   <children>
-      <Canvas fx:id="XORGrid" height="700.0" width="700.0" />
-      <VBox alignment="TOP_CENTER" prefHeight="700.0" prefWidth="250.0" style="-fx-spacing: 20; -fx-border-style: hidden solid hidden solid; -fx-border-width: 2;">
+<BorderPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.elijahgabrielletanabe.Controllers.GridVizController">
+   <center>
+      <HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="950.0">
          <children>
-            <Label alignment="CENTER" prefHeight="50.0" prefWidth="246.0" style="-fx-border-style: hidden hidden solid hidden;" text="Options">
-               <font>
-                  <Font name="Lucida Console" size="14.0" />
-               </font>
-            </Label>
-            <VBox alignment="TOP_CENTER" prefWidth="100.0">
+            <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0" styleClass="canvas-container">
                <children>
-                  <Label text="Speed">
+                  <Label prefHeight="25.0" text="Network Visualization">
                      <font>
-                        <Font name="Lucida Console" size="12.0" />
+                        <Font name="Lucida Console" size="16.0" />
                      </font>
                      <VBox.margin>
-                        <Insets bottom="6.0" />
+                        <Insets top="10.0" />
                      </VBox.margin>
                   </Label>
-                  <Slider fx:id="speedSlider" blockIncrement="25.0" majorTickUnit="75.0" max="300.0" onMouseReleased="#speedSliderChanged" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="300.0">
+                  <Canvas fx:id="XORGrid" height="630.0" styleClass="network-canvas" width="630.0">
+                     <VBox.margin>
+                        <Insets left="25.0" right="25.0" top="10.0" />
+                     </VBox.margin>
+                  </Canvas>
+                  <HBox alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="680.0" style="-fx-spacing: 10;">
+                     <children>
+                        <Label fx:id="learningRateLabel" text="learning_rate=" />
+                        <Label fx:id="hiddenNodesLabel" text="hidden_nodes=" />
+                        <Label fx:id="iterationsLabel" text="iterations=" />
+                     </children>
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin>
+                     <padding>
+                        <Insets left="25.0" />
+                     </padding>
+                  </HBox>
+               </children>
+            </VBox>
+            <VBox alignment="TOP_CENTER" prefHeight="700.0" prefWidth="300.0" style="-fx-spacing: 10; -fx-border-style: hidden hidden hidden solid; -fx-border-width: 1;" styleClass="control-panel">
+               <children>
+                  <Label alignment="CENTER" prefHeight="50.0" prefWidth="268.0" style="-fx-border-style: hidden hidden solid hidden; -fx-border-width: 0.5;" text="Settings">
+                     <font>
+                        <Font name="Lucida Console" size="14.0" />
+                     </font>
+                  </Label>
+                  <VBox alignment="TOP_CENTER" prefWidth="100.0">
+                     <children>
+                        <Label text="Speed">
+                           <font>
+                              <Font name="Lucida Console" size="12.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets bottom="6.0" />
+                           </VBox.margin>
+                        </Label>
+                        <Slider fx:id="speedSlider" blockIncrement="25.0" majorTickUnit="75.0" max="300.0" onMouseReleased="#speedSliderChanged" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="300.0">
+                           <padding>
+                              <Insets left="15.0" right="15.0" />
+                           </padding>
+                        </Slider>
+                     </children>
+                  </VBox>
+                  <VBox alignment="TOP_CENTER">
+                     <children>
+                        <Label text="Resolution">
+                           <font>
+                              <Font name="Lucida Console" size="12.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets bottom="6.0" />
+                           </VBox.margin>
+                        </Label>
+                        <Slider fx:id="resolutionSlider" blockIncrement="25.0" majorTickUnit="100.0" max="400.0" prefWidth="100.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="100.0">
+                           <padding>
+                              <Insets left="15.0" right="15.0" />
+                           </padding>
+                           <VBox.margin>
+                              <Insets bottom="10.0" />
+                           </VBox.margin>
+                        </Slider>
+                     </children>
+                  </VBox>
+                  <Line endX="100.0" startX="-165.13291931152344" startY="-0.6978451013565063" strokeDashOffset="5.0" strokeWidth="0.5" />
+                  <VBox alignment="TOP_CENTER" prefWidth="186.0">
+                     <children>
+                        <Label text="Learning Rate">
+                           <font>
+                              <Font name="Lucida Console" size="12.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets bottom="6.0" />
+                           </VBox.margin>
+                        </Label>
+                        <Slider fx:id="learningRateSlider" blockIncrement="0.01" majorTickUnit="0.02" max="0.1" minorTickCount="1" prefWidth="100.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.1" />
+                     </children>
                      <padding>
                         <Insets left="15.0" right="15.0" />
                      </padding>
-                  </Slider>
-               </children>
-            </VBox>
-            <VBox alignment="TOP_CENTER" prefWidth="186.0">
-               <children>
-                  <Label text="Learning Rate">
-                     <font>
-                        <Font name="Lucida Console" size="12.0" />
-                     </font>
-                     <VBox.margin>
-                        <Insets bottom="6.0" />
-                     </VBox.margin>
-                  </Label>
-                  <Slider fx:id="learningRateSlider" blockIncrement="0.01" majorTickUnit="0.02" max="0.1" minorTickCount="1" prefWidth="100.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.1" />
-               </children>
-               <padding>
-                  <Insets left="15.0" right="15.0" />
-               </padding>
-            </VBox>
-            <VBox alignment="TOP_CENTER" prefWidth="186.0">
-               <children>
-                  <Label text="Hidden Nodes">
-                     <font>
-                        <Font name="Lucida Console" size="12.0" />
-                     </font>
-                     <VBox.margin>
-                        <Insets bottom="6.0" />
-                     </VBox.margin>
-                  </Label>
-                  <Slider fx:id="hiddenNodesSlider" blockIncrement="1.0" majorTickUnit="1.0" max="10.0" min="1.0" minorTickCount="0" prefWidth="100.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="4.0" />
-               </children>
-               <padding>
-                  <Insets left="15.0" right="15.0" />
-               </padding>
-            </VBox>
-            <VBox alignment="TOP_CENTER">
-               <children>
-                  <Label text="Resolution">
-                     <font>
-                        <Font name="Lucida Console" size="12.0" />
-                     </font>
-                     <VBox.margin>
-                        <Insets bottom="6.0" />
-                     </VBox.margin>
-                  </Label>
-                  <Slider fx:id="resolutionSlider" blockIncrement="25.0" majorTickUnit="100.0" max="400.0" prefWidth="100.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="100.0">
+                  </VBox>
+                  <VBox alignment="TOP_CENTER" prefWidth="186.0">
+                     <children>
+                        <Label text="Hidden Nodes">
+                           <font>
+                              <Font name="Lucida Console" size="12.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets bottom="6.0" />
+                           </VBox.margin>
+                        </Label>
+                        <Slider fx:id="hiddenNodesSlider" blockIncrement="1.0" majorTickUnit="1.0" max="10.0" min="1.0" minorTickCount="0" prefWidth="100.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="4.0" />
+                     </children>
                      <padding>
                         <Insets left="15.0" right="15.0" />
                      </padding>
+                  </VBox>
+                  <Line endX="100.0" startX="-165.13291931152344" startY="-0.6978451013565063" strokeDashOffset="5.0" strokeWidth="0.5" />
+                  <VBox alignment="TOP_CENTER" prefWidth="200.0">
+                     <children>
+                        <Label text="Training Type">
+                           <font>
+                              <Font name="Lucida Console" size="12.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets bottom="6.0" />
+                           </VBox.margin>
+                        </Label>
+                        <ComboBox prefHeight="25.0" prefWidth="140.0" promptText="Stochastic" style="-fx-font-family: &quot;Lucida Console&quot;;" />
+                     </children>
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
                      <VBox.margin>
                         <Insets bottom="10.0" />
                      </VBox.margin>
-                  </Slider>
-               </children>
-            </VBox>
-            <VBox alignment="TOP_CENTER" prefWidth="200.0">
-               <children>
-                  <Label text="Training Type">
-                     <font>
-                        <Font name="Lucida Console" size="12.0" />
-                     </font>
+                  </VBox>
+                  <VBox alignment="TOP_CENTER" prefWidth="200.0">
+                     <children>
+                        <Label text="Activation Type">
+                           <font>
+                              <Font name="Lucida Console" size="12.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets bottom="6.0" />
+                           </VBox.margin>
+                        </Label>
+                        <ComboBox prefHeight="25.0" prefWidth="140.0" promptText="Sigmoid" style="-fx-font-family: &quot;Lucida Console&quot;;" />
+                     </children>
                      <VBox.margin>
-                        <Insets bottom="6.0" />
+                        <Insets />
                      </VBox.margin>
-                  </Label>
-                  <ComboBox prefHeight="25.0" prefWidth="140.0" promptText="Stochastic" style="-fx-font-family: &quot;Lucida Console&quot;;" />
-               </children>
-               <opaqueInsets>
-                  <Insets />
-               </opaqueInsets>
-               <VBox.margin>
-                  <Insets bottom="10.0" />
-               </VBox.margin>
-            </VBox>
-            <VBox alignment="TOP_CENTER" prefWidth="200.0">
-               <children>
-                  <Label text="Activation Type">
-                     <font>
-                        <Font name="Lucida Console" size="12.0" />
-                     </font>
+                  </VBox>
+                  <Line endX="100.0" startX="-165.13291931152344" startY="-0.6978451013565063" strokeDashOffset="5.0" strokeWidth="0.5" />
+                  <VBox alignment="CENTER" prefHeight="163.0" prefWidth="268.0" style="-fx-spacing: 25;" VBox.vgrow="ALWAYS">
                      <VBox.margin>
-                        <Insets bottom="6.0" />
+                        <Insets />
                      </VBox.margin>
-                  </Label>
-                  <ComboBox prefHeight="25.0" prefWidth="140.0" promptText="Sigmoid" style="-fx-font-family: &quot;Lucida Console&quot;;" />
+                     <children>
+                        <Button fx:id="nodeViewButton" mnemonicParsing="false" onMouseClicked="#nodeViewPressed" prefHeight="35.0" prefWidth="115.0" text="View Nodes">
+                           <font>
+                              <Font name="Lucida Console" size="12.0" />
+                           </font>
+                        </Button>
+                        <Button fx:id="pausePlayButton" mnemonicParsing="false" onMousePressed="#pausePlayPressed" prefHeight="35.0" prefWidth="115.0" text="Play">
+                           <font>
+                              <Font name="Lucida Console" size="12.0" />
+                           </font>
+                        </Button>
+                        <Button fx:id="restartButton" mnemonicParsing="false" onMousePressed="#restartPressed" prefHeight="35.0" prefWidth="115.0" text="Restart">
+                           <font>
+                              <Font name="Lucida Console" size="12.0" />
+                           </font>
+                        </Button>
+                     </children>
+                     <padding>
+                        <Insets bottom="15.0" top="15.0" />
+                     </padding>
+                  </VBox>
                </children>
-               <VBox.margin>
-                  <Insets />
-               </VBox.margin>
             </VBox>
-            <VBox alignment="CENTER" prefWidth="250.0" style="-fx-spacing: 25;" VBox.vgrow="ALWAYS">
-               <VBox.margin>
-                  <Insets />
-               </VBox.margin>
-               <children>
-                  <Button fx:id="nodeViewButton" mnemonicParsing="false" onMouseClicked="#nodeViewPressed" prefHeight="35.0" prefWidth="115.0" text="View Nodes">
-                     <font>
-                        <Font name="Lucida Console" size="12.0" />
-                     </font>
-                  </Button>
-                  <Button fx:id="pausePlayButton" mnemonicParsing="false" onMousePressed="#pausePlayPressed" prefHeight="35.0" prefWidth="115.0" text="Play">
-                     <font>
-                        <Font name="Lucida Console" size="12.0" />
-                     </font>
-                  </Button>
-                  <Button fx:id="restartButton" mnemonicParsing="false" onMousePressed="#restartPressed" prefHeight="35.0" prefWidth="115.0" text="Restart">
-                     <font>
-                        <Font name="Lucida Console" size="12.0" />
-                     </font>
-                  </Button>
-               </children>
-               <padding>
-                  <Insets bottom="15.0" top="15.0" />
-               </padding>
-            </VBox>
-         </children></VBox>
-   </children>
-</HBox>
+         </children>
+      </HBox>
+   </center>
+</BorderPane>

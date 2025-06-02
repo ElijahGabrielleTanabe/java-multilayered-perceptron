@@ -21,6 +21,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
@@ -29,6 +30,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -36,6 +38,7 @@ public class NodeVizController implements Initializable
 {
     @FXML private HBox hbox;
     @FXML private AnchorPane anchorPaneRoot;
+    @FXML private Rectangle legend;
 
     private NeuralNetwork nn;
     private Stage stage;
@@ -55,6 +58,8 @@ public class NodeVizController implements Initializable
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
+        this.legend.getStyleClass().add("legend");
+
         Platform.runLater(() -> {
             double vboxWidth = this.hbox.getWidth() / 3;
 
@@ -76,6 +81,7 @@ public class NodeVizController implements Initializable
                     createHeatMap(circle);
                 });
 
+                node.getStyleClass().add("hidden-node");
                 this.circleToNode.put(node, i);
             }
 
@@ -90,6 +96,7 @@ public class NodeVizController implements Initializable
     {
         VBox parent = new VBox();
         Label label = new Label(name);
+        label.getStyleClass().add("node-layer-label");
 
         VBox nodeVbox = new VBox(60);
         //nodeVbox.setMinWidth(vboxWidth);
@@ -112,6 +119,7 @@ public class NodeVizController implements Initializable
         for (int i = 0; i < num; i++)
         {
             Circle circle = new Circle(24);
+            circle.getStyleClass().add("node");
             container.getChildren().add(circle);
         }
     }
@@ -125,9 +133,11 @@ public class NodeVizController implements Initializable
             this.heatMapStage = new Stage();
             Scene heatMapScene = new Scene(root);
 
+            heatMapScene.getStylesheets().add(App.getFileByString("HeatmapViz.css", "css").toExternalForm());
             this.heatMapController.setNeuralNetwork(this.nn);
             this.heatMapController.setNode(this.circleToNode.get(node));
             this.heatMapController.createHeatMap();
+            this.heatMapStage.setResizable(false);
             this.heatMapStage.setScene(heatMapScene);
             this.heatMapStage.show();
         } catch (IOException e) {
@@ -183,9 +193,6 @@ public class NodeVizController implements Initializable
                     Bounds p1 = this.anchorPaneRoot.sceneToLocal(to.localToScene(to.getBoundsInLocal()));
                     Bounds p2 = this.anchorPaneRoot.sceneToLocal(from.localToScene(from.getBoundsInLocal()));
 
-                    System.out.println("p1: x = " + p1.getCenterX() + ", y = " + p1.getCenterY());
-                    System.out.println("p2: x = " + p2.getCenterX() + ", y = " + p2.getCenterY());
-
                     Line line = new Line(p1.getCenterX(), p1.getCenterY(), p2.getCenterX(), p2.getCenterY());
                     line.setStrokeWidth(2.1);
 
@@ -204,68 +211,51 @@ public class NodeVizController implements Initializable
     
     public void updateWeightLines()
     {
-        System.out.println("Updating Weight Lines!");
         //Extremely hardcoded due to NeuralNetwork's design
-        double[][] weightsIH = this.nn.getWeightsIH().getMatrix();
-        double[][] weightsHO = this.nn.getWeightsHO().getMatrix();
+        double[][][] weightsList = {
+            this.nn.getWeightsIH().getMatrix(),
+            this.nn.getWeightsHO().getMatrix()
+        };
 
         if (this.weightLines.isEmpty()) { return; }
 
-        if ((weightsIH.length * weightsIH[0].length) != this.weightLines.get(0).size())
+        for (int k = 0; k < weightsList.length; k++)
         {
-            throw new IllegalArgumentException("Not the same size: " + weightsIH.length + " vs " + this.weightLines.get(0).size());
-        }
+            int index = 0;
+            double[][] weightMatrix = weightsList[k];
 
-        int index = 0;
-        //WeightsIH
-        for (int i = 0; i < weightsIH.length; i++)
-        {
-            for (int j = 0; j < weightsIH[i].length; j++)
+            if ((weightMatrix.length * weightMatrix[0].length) != this.weightLines.get(k).size())
             {
-                //Weights range -1 - 1
-                double weight = weightsIH[i][j];
-                double normalized = App.map(weight, this.nn.getWeightsIH().getMinValue(), this.nn.getWeightsIH().getMaxValue(), -1, 1);
-                Color color = null;
-
-                if (normalized > 0) {
-                    color = new Color(0, 0, normalized, 1.0);
-                } else if (normalized < 0) {
-                    color = new Color(-normalized, 0, 0, 1.0);
-                } else {
-                    color = new Color(0, 0, 0, 1.0);
-                }
-
-                this.weightLines.get(0).get(index).setStroke(color);
-                index++;
+                throw new IllegalArgumentException("Not the same size: " + weightMatrix.length * weightMatrix[0].length + " vs " + this.weightLines.get(0).size());
             }
-        }
 
-        if ((weightsHO.length * weightsHO[0].length) != this.weightLines.get(1).size())
-        {
-            throw new IllegalArgumentException("Not the same size: " + weightsHO.length + " vs " + this.weightLines.get(1).size());
-        }
-
-        index = 0;
-        //WeightOH
-        for (int i = 0; i < weightsHO.length; i++)
-        {
-            for (int j = 0; j < weightsHO[i].length; j++)
+            for (int i = 0; i < weightMatrix.length; i++)
             {
-                //Weights range -1 - 1
-                double weight = weightsHO[i][j];
-                double normalized = App.map(weight, this.nn.getWeightsHO().getMinValue(), this.nn.getWeightsHO().getMaxValue(), -1, 1);
-                Color color = null;
+                for (int j = 0; j < weightMatrix[i].length; j++)
+                {
+                    //Normalized range -1 - 1
+                    double weight = weightMatrix[i][j];
+                    double normalized = App.map(weight, this.nn.getWeightsIH().getMinValue(), this.nn.getWeightsIH().getMaxValue(), -1, 1);
+                    normalized = Math.max(-1, Math.min(1, normalized));
+                    Color color = null;
+                    double stroke = 0;
 
-                if (normalized > 0) {
-                    color = new Color(0, 0, normalized, 1.0);
-                } else if (normalized < 0) {
-                    color = new Color(normalized * -1, 0, 0, 1.0);
-                } else {
-                    color = new Color(0, 0, 0, 1.0);
+                    if (normalized > 0) {
+                        color = new Color(0, 0, normalized, 1.0);
+                        stroke = App.map(normalized, 0, 1, 0.5, 2);
+                    } else if (normalized < 0) {
+                        color = new Color(-normalized, 0, 0, 1.0);
+                        stroke = App.map(normalized, -1, 0, 2,0.5);
+                    } else {
+                        color = new Color(0, 0, 0, 1.0);
+                        stroke = 1;
+                    }
+
+                    this.weightLines.get(k).get(index).setEffect(new DropShadow(5, color));
+                    this.weightLines.get(k).get(index).setStroke(color);
+                    this.weightLines.get(k).get(index).setStrokeWidth(stroke);
+                    index++;
                 }
-
-                this.weightLines.get(1).get(index).setStroke(color);
-                index++;
             }
         }
     }
@@ -273,7 +263,7 @@ public class NodeVizController implements Initializable
     public void cleanUp()
     {
         if (this.heatMapStage != null) 
-        { 
+        {
             this.heatMapStage.close();
             this.heatMapStage = null;
         }
@@ -281,14 +271,14 @@ public class NodeVizController implements Initializable
     }
 
     public void setNeuralNetwork(NeuralNetwork nn) { this.nn = nn; }
-    public void setStage(Stage stage) 
+    public void setStage(Stage stage)
     { 
         this.stage = stage;
 
         this.stage.setOnShown(e -> {
             System.out.println("Stage set");
-            PauseTransition delay = new PauseTransition(Duration.millis(50));
-            delay.setOnFinished(ev -> createWeightLines());
+            PauseTransition delay = new PauseTransition(Duration.millis(100));
+            delay.setOnFinished(ev -> Platform.runLater(() -> createWeightLines()));
             delay.play();
         });
     }

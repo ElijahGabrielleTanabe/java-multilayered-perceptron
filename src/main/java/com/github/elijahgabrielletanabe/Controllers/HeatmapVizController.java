@@ -11,11 +11,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.chart.LineChart;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 public class HeatmapVizController implements Initializable
 {
     @FXML private Canvas heatMapCanvas;
+    @FXML private LineChart lineChart;
+    @FXML private Rectangle legend;
 
     private NeuralNetwork nn;
     private int node;
@@ -32,6 +36,7 @@ public class HeatmapVizController implements Initializable
 
     public void createHeatMap()
     {
+        this.legend.getStyleClass().add("legend");
         GraphicsContext gc = this.heatMapCanvas.getGraphicsContext2D();
         double gridSize = this.heatMapCanvas.getHeight();
         double widthAndHeight = gridSize / this.resolution;

@@ -2,8 +2,11 @@ package com.github.elijahgabrielletanabe.Controllers;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.IntBuffer;
 import java.util.Random;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import com.github.elijahgabrielletanabe.App;
 import com.github.elijahgabrielletanabe.Model.Matrix;
@@ -20,7 +23,11 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.image.PixelFormat;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -39,21 +46,31 @@ public class GridVizController implements Initializable
     @FXML private Button pausePlayButton;
     @FXML private Button restartButton;
 
+    @FXML private Label learningRateLabel;
+    @FXML private Label hiddenNodesLabel;
+    @FXML private Label iterationsLabel;
+
     private Stage nodeStage;
     private NodeVizController nodeController;
 
     private final Matrix[] inputs;
     private final Matrix[] targets;
+    private final Object nnLock;
+    private ExecutorService executor;
+    private WritableImage canvasImage;
+    private int[] intArgbBuffer;
 
     private NeuralNetwork nn;
     private AnimationTimer timer;
     private boolean playing;
+    private int totalIterations;
     private double resolution;
     private double speed;
 
     public GridVizController()
     {
         this.playing = false;
+        this.totalIterations = 0;
         
         this.inputs = new Matrix[]{
             new Matrix(new double[]{0, 1}),
@@ -68,6 +85,9 @@ public class GridVizController implements Initializable
             new Matrix(new double[]{0}),
             new Matrix(new double[]{0})
         };
+
+        this.nnLock = new Object();
+        this.executor = Executors.newSingleThreadExecutor();
     }
 
     @Override
@@ -75,24 +95,36 @@ public class GridVizController implements Initializable
     {
         //#Initialize Values
         GraphicsContext gc = this.XORGrid.getGraphicsContext2D();
+        gc.setFill(Color.web("#1e1e1e")); // dark gray background
+        gc.fillRect(0, 0, this.XORGrid.getWidth(), this.XORGrid.getHeight());
+
         this.speed = this.speedSlider.getMax() + 1 - this.speedSlider.getValue();
         this.resolution = this.resolutionSlider.getValue();
+
         this.nn = new NeuralNetwork(2, (int) this.hiddenNodesSlider.getValue(), 1);
         this.nn.setLearningRate(learningRateSlider.getValue());
 
-        //# Animation loop
+        //Set Label texts
+        updateLabels();
+
+        //# Main Animation loop
         this.timer = new AnimationTimer() {
             private long last = 0;
             //# Take from speed slider
-            private double duration = 16.67; //Milliseconds      
+            private double duration = 16.67; //Milliseconds
+            
             @Override
             public void handle(long now)
             {
                 if (now - last >= duration * 1000000) //Nanoseconds
                 {
                     this.duration = getSpeed();
-                    train();
-                    updateView(gc);
+
+                    executor.submit(() -> {
+                        train();
+
+                        Platform.runLater(() -> updateView(gc));
+                    });
 
                     last = now;
                 }
@@ -124,13 +156,18 @@ public class GridVizController implements Initializable
         //# New NeuralNetwork object
         double learningRate = this.learningRateSlider.getValue();
         int hiddenNodes = (int) this.hiddenNodesSlider.getValue();
-
         this.nn = new NeuralNetwork(2, hiddenNodes, 1);
         this.nn.setLearningRate(learningRate);
-        this.resolution = this.resolutionSlider.getValue();
-        this.playing = true;
-        this.pausePlayButton.setText("Pause");
 
+        this.resolution = this.resolutionSlider.getValue();
+        this.totalIterations = 0;
+        this.playing = true;
+
+        //Set texts
+        this.pausePlayButton.setText("Pause");
+        updateLabels();
+
+        //!!FIX!!
         PauseTransition delay = new PauseTransition(Duration.millis(150));
         delay.setOnFinished(e -> {
             if (this.nodeStage != null)
@@ -172,6 +209,7 @@ public class GridVizController implements Initializable
         this.nodeStage = new Stage();
         Scene nodeScene = new Scene(root);
 
+        nodeScene.getStylesheets().add(App.getFileByString("NodeViz.css", "css").toExternalForm());
         this.nodeController.setNeuralNetwork(this.nn);
         this.nodeController.setStage(nodeStage);
         this.nodeStage.setScene(nodeScene);
@@ -200,45 +238,91 @@ public class GridVizController implements Initializable
         this.nodeViewButton.setDisable(false);
     }
 
+    public void cleanUp()
+    {
+        this.timer.stop();
+        cleanUpNodeView();
+        this.executor.shutdownNow();
+        Platform.exit();
+    }
+
     //# Train on worker thread
     private void train()
     {
-        int iters = 5000;
-
-        for (int i = 0; i < iters; i++)
+        synchronized (this.nnLock)
         {
             Random rand = new Random();
-            int randomIndex = rand.nextInt(4);
+            int iters = 1000;
 
-            this.nn.train(this.inputs[randomIndex], this.targets[randomIndex]);
-        }
+            for (int i = 0; i < iters; i++)
+            {
+                int randomIndex = rand.nextInt(4);
+
+                this.nn.train(this.inputs[randomIndex], this.targets[randomIndex]);
+                this.totalIterations++;
+                Platform.runLater(() -> this.iterationsLabel.setText("iterations=" + this.totalIterations));
+            }
+        } 
     }
 
     private void updateView(GraphicsContext gc)
     {
-        double gridSize = this.XORGrid.getHeight();
-        double widthAndHeight = gridSize / this.resolution;
-
-        for (double i = 0; i < this.resolution; i++)
+        synchronized (this.nnLock)
         {
-            for (double j = 0; j < this.resolution; j++)
+            double width = this.XORGrid.getWidth() / this.resolution;
+            double height = this.XORGrid.getHeight() / this.resolution;
+            int intResolution = (int) this.resolution;
+
+            if (this.canvasImage == null || this.canvasImage.getWidth() != this.resolution || this.canvasImage.getHeight() != this.resolution)
             {
-                double x = App.map(widthAndHeight * j, 0, gridSize, 0, 1);
-                double y = App.map(widthAndHeight * i, 0, gridSize, 0, 1);
-
-                Matrix output = nn.feedForward(new Matrix(new double[]{x, y}));
-                double result = output.getMatrix()[0][0];
-
-                gc.setFill(new Color(result, result, result, 1.0));
-                gc.fillRect(widthAndHeight * j, widthAndHeight * i, widthAndHeight, widthAndHeight);
+                this.canvasImage = new WritableImage(intResolution, intResolution);
+                this.intArgbBuffer = new int[intResolution * intResolution];
             }
+
+            PixelWriter pw = this.canvasImage.getPixelWriter();
+            PixelFormat<IntBuffer> format = PixelFormat.getIntArgbInstance();
+
+            Matrix input = new Matrix(new double[]{0, 0});
+
+            for (int py = 0; py < this.resolution; py++)
+            {
+                double y = App.map((double) py, 0, this.resolution, 0, 1);
+
+                for (int px = 0; px < this.resolution; px++)
+                {
+                    double x = App.map((double) px, 0, this.resolution, 0, 1);
+
+                    input.set(0, 0, x);
+                    input.set(1, 0, y);
+
+                    Matrix output = nn.feedForward(input);
+                    double result = output.get(0, 0);
+                    int hexColour = (int) (result * 255);
+
+                    int rgbInt = (255 << 24) | (hexColour << 16) | (hexColour << 8) | hexColour;
+                    this.intArgbBuffer[py * intResolution + px] = rgbInt;
+                }
+            }
+
+            pw.setPixels(0, 0, intResolution, intResolution, format, this.intArgbBuffer, 0, intResolution);
+
+            gc.drawImage(this.canvasImage, 0, 0, this.XORGrid.getWidth(), this.XORGrid.getHeight());
+
+            Platform.runLater(() -> {
+                synchronized (this.nnLock) {
+                    if (this.nodeController != null) {
+                        this.nodeController.updateWeightLines();
+                    }
+                }
+            });
         }
+    }
 
-        Platform.runLater(() -> {
-            if (this.nodeController != null) {
-                this.nodeController.updateWeightLines();
-            }
-        });
+    private void updateLabels()
+    {
+        this.learningRateLabel.setText("learning_rate=" + this.learningRateSlider.getValue());
+        this.hiddenNodesLabel.setText("hidden_nodes=" + (int) this.hiddenNodesSlider.getValue());
+        this.iterationsLabel.setText("iterations=0");
     }
 
     public double getSpeed() { return this.speed; }

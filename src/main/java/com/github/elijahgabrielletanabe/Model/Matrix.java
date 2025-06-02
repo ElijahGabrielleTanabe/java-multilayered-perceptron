@@ -237,6 +237,7 @@ public class Matrix
     }
 
     public double[][] getMatrix() { return this.matrix; }
+    public double get(int i, int j) { return this.matrix[i][j]; }
     public double getMinValue()
     {
         Double min = Double.MAX_VALUE;
@@ -268,6 +269,7 @@ public class Matrix
 
     public void setMatrix(Matrix matrix) { this.matrix = matrix.getMatrix(); }
     public void setMatrix(double[][] matrix) { this.matrix = matrix; }
+    public void set(int i, int j, double value) { this.matrix[i][j] = value; }
 
     @Override
     public String toString()

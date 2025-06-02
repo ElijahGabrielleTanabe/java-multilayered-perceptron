@@ -1,0 +1,36 @@
+.root {
+    -fx-background-color: linear-gradient(to bottom, #1e1e1e, #2a2a2a);
+    -fx-text-fill: #e0e0e0;
+}
+
+.label {
+    -fx-font-family: "Lucida Console";
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.label .text {
+    -fx-fill: rgb(229, 229, 229);
+}
+
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.legend {
+    -fx-fill: linear-gradient(to bottom, red, black, blue);
+    -fx-stroke: transparent;
+}
+
+.axis {
+    -fx-tick-label-fill: rgb(226, 226, 226);
+}
+
+.axis .axis-minor-tick-mark,
+.axis .axis-tick-mark {
+    -fx-stroke: rgb(236, 236, 236);
+}
+
+.axis-label {
+    -fx-font-family: "Lucida Console";
+}
