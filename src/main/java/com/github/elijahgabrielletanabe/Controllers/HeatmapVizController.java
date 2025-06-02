@@ -12,6 +12,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
@@ -20,6 +21,8 @@ public class HeatmapVizController implements Initializable
     @FXML private Canvas heatMapCanvas;
     @FXML private LineChart lineChart;
     @FXML private Rectangle legend;
+    @FXML private NumberAxis xAxis;
+    @FXML private NumberAxis yAxis;
 
     private NeuralNetwork nn;
     private int node;
@@ -31,7 +34,26 @@ public class HeatmapVizController implements Initializable
     }
 
     public void initialize(URL location, ResourceBundle resources)
-    {   
+    {
+        this.yAxis.setLowerBound(-1);
+        this.yAxis.setUpperBound(0);
+        this.yAxis.setTickUnit(0.5);
+
+        yAxis.setTickLabelFormatter(new NumberAxis.DefaultFormatter(yAxis) {
+            @Override
+            public String toString(Number value) {
+                // note we are printing minus value
+                return String.format("%3.1f", Math.abs((double) value));
+            }
+        });
+
+        xAxis.setTickLabelFormatter(new NumberAxis.DefaultFormatter(xAxis) {
+            @Override
+            public String toString(Number value) {
+                // note we are printing minus value
+                return String.format("%3.1f", Math.abs((double) value));
+            }
+        });
     }
 
     public void createHeatMap()
