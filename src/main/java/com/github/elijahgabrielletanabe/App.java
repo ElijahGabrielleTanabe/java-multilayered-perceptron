@@ -9,7 +9,6 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 public class App extends Application {
 
@@ -30,7 +29,7 @@ public class App extends Application {
         scene = new Scene(fxmlLoader.load());
         scene.getStylesheets().add(getFileByString("GridViz.css", "css").toExternalForm());
         this.controller = fxmlLoader.getController();
-        //# Custom Menu Bar
+        //# Customize Menu Bar
         //stage.initStyle(StageStyle.UNDECORATED);
         stage.setScene(scene);
         stage.setResizable(false);

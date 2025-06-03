@@ -18,7 +18,7 @@
 }
 
 .legend {
-    -fx-fill: linear-gradient(to bottom, red, black, blue);
+    -fx-fill: linear-gradient(to bottom, blue, black, red);
     -fx-stroke: transparent;
 }
 
