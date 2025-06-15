@@ -21,10 +21,17 @@ This neural network is aimed at solving the non-linearly seperable problem XOR, 
 3) Run the launch.bat file.
 > This image was created with Jlink and contains a JRE, the necessary dependencies, and the source files. Feel free to verify its contents before you run it
 
-#### With JDK Installed
+#### With JDK 17+ Installed
 1) Download the full Maven project in the [main branch](https://github.com/ElijahGabrielleTanabe/java-multilayered-perceptron/tree/main).
 2) Open a terminal and cd into the project directory at the same level as the pom.xml file.
 3) With the Maven Wrapper run the command `mvnw.cmd clean javafx:run` for windows command prompt or `./mvnw clean javafx:run` for everything else.
+4) After you are done, you can delete the .m2 and cache folders that contains the artifacts and other files that were downloaded.
+
+| Operating System | .m2 directory | Cache directory |
+| ---------------- | ------------- | --------------- |
+| Windows | C:\Users\\<username\>\\.m2 | C:\Users\\<username\>\AppData\Local |
+| Linux | /home/\<username\>/.m2 | /home/\<username\>/.cache |
+| Mac | /Users/\<username\>/.m2 | /Users/\<username\>/.cache |
 
 ## How it works
 

@@ -11,6 +11,9 @@ public class NeuralNetwork
     private Matrix biasH;
     private Matrix biasO;
 
+    private Matrix velocityIH;
+    private Matrix velocityHO;
+
     private double learningRate;
 
     public NeuralNetwork(int inputNodes, int hiddenNodes, int outputNodes)
@@ -26,6 +29,9 @@ public class NeuralNetwork
 
         this.biasH.randomize();
         this.biasO.randomize();
+
+        this.velocityIH = new Matrix(hiddenNodes, inputNodes);
+        this.velocityHO = new Matrix(outputNodes, hiddenNodes);
 
         this.hiddenOut = new Matrix(new double[hiddenNodes]);
         this.outputOut = new Matrix(new double[outputNodes]);
@@ -88,6 +94,11 @@ public class NeuralNetwork
         //Calculate delta weights for weightsHO
         Matrix tHidden = Matrix.transpose(this.hiddenOut);
         Matrix deltaWeightsHO = Matrix.matrixMultiply(outputGradient, tHidden); //a(l-1)
+        deltaWeightsHO.multiply(this.velocityHO);
+        //V(t) = sigmoid(W(t-1))
+        this.velocityHO = Matrix.deepCopy(deltaWeightsHO);
+        this.velocityHO.map(x -> sigmoid(x));
+        //System.out.println(this.velocityHO);
 
         //Apply changes to weightsHO
         this.weightsHO.add(deltaWeightsHO);
@@ -106,6 +117,10 @@ public class NeuralNetwork
         //Calculate delta weights for weightIH
         Matrix tInputs = Matrix.transpose(inputs);
         Matrix deltaWeightsIH = Matrix.matrixMultiply(hiddenGradient, tInputs);
+        deltaWeightsIH.multiply(this.velocityIH);
+        //V(t) = sigmoid(W(t-1))
+        this.velocityIH = Matrix.deepCopy(deltaWeightsIH);
+        this.velocityIH.map(x -> sigmoid(x));
 
         //Apply changes to weightsIH
         this.weightsIH.add(deltaWeightsIH);

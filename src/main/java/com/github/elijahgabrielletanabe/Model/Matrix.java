@@ -236,6 +236,22 @@ public class Matrix
         return newMatrix;
     }
 
+    public static Matrix deepCopy(Matrix m1)
+    {
+        double[][] matrixArray = m1.getMatrix();
+        Matrix newMatrix = new Matrix(matrixArray.length, matrixArray[0].length);
+
+        for (int i = 0; i < matrixArray.length; i++)
+        {
+            for (int j = 0; j < matrixArray[i].length; j++)
+            {
+                newMatrix.getMatrix()[i][j] = matrixArray[i][j];
+            }
+        }
+
+        return newMatrix;
+    }
+
     public double[][] getMatrix() { return this.matrix; }
     public double get(int i, int j) { return this.matrix[i][j]; }
     public double getMinValue()
