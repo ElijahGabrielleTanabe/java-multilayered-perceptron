@@ -166,11 +166,9 @@ public class GridVizController implements Initializable
         //Set texts
         this.pausePlayButton.setText("Pause");
         updateLabels();
-
-        //!!FIX!!
-        PauseTransition delay = new PauseTransition(Duration.millis(150));
-        delay.setOnFinished(e -> {
-            if (this.nodeStage != null)
+		
+		Platform.runLater(() -> {
+			if (this.nodeStage != null)
             {
                 try {
                     this.nodeStage.close();
@@ -179,10 +177,8 @@ public class GridVizController implements Initializable
                     System.out.println("Unable to load: NodeViz.fxml");
                 }
             }
-        this.timer.start();
-        });
-
-        delay.play();
+			this.timer.start();
+		});
     }
 
     @FXML
